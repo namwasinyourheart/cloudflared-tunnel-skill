@@ -1,12 +1,13 @@
 # cloudflared-tunnel skill
 
-Agent skill để tạo **quick tunnel** bằng `cloudflared tunnel --url`, expose một
-local web server/port ra internet qua Cloudflare — không cần tài khoản, không cần DNS.
+Agent skill to create a **quick tunnel** with `cloudflared tunnel --url` that
+exposes a local web server/port to the internet through Cloudflare — no account,
+no DNS required.
 
-Skill được viết theo [Agent Skills](https://agentskills.io) (mở, đa agent) — hoạt động
-với OpenCode, Claude Code, Codex, Cursor và nhiều agent khác.
+Written in the open, multi-agent [Agent Skills](https://agentskills.io) format —
+works with OpenCode, Claude Code, Codex, Cursor and many other agents.
 
-## Cấu trúc
+## Structure
 
 ```
 skills/
@@ -14,56 +15,56 @@ skills/
     └── SKILL.md
 ```
 
-## Cài đặt
+## Installation
 
-### Cách 1: `skills` CLI (khuyên dùng — cài được qua internet)
+### Option 1: `skills` CLI (recommended — install over the internet)
 
 ```bash
-# Thử/hiển thị
+# Preview / list
 npx skills add namwasinyourheart/cloudflared-tunnel-skill --list
 
-# Cài skill
+# Install the skill
 npx skills add namwasinyourheart/cloudflared-tunnel-skill --skill cloudflared-tunnel
 ```
 
-Thêm `-g` để cài toàn cục, `-a opencode`/`-a claude-code` để chọn agent đích:
+Add `-g` for a global install and `-a opencode` / `-a claude-code` to target a
+specific agent:
 ```bash
 npx skills add namwasinyourheart/cloudflared-tunnel-skill --skill cloudflared-tunnel -a opencode -g
 ```
 
-### Cách 2: OpenCode — clone + trỏ `skills.paths`
+### Option 2: OpenCode — clone + point `skills.paths`
 
 ```bash
 git clone https://github.com/namwasinyourheart/cloudflared-tunnel-skill.git
 ```
 
-Rồi trong `opencode.json`:
+Then in `opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "skills": { "paths": ["/đường/dẫn/đến/cloudflared-tunnel-skill/skills"] }
+  "skills": { "paths": ["/path/to/cloudflared-tunnel-skill/skills"] }
 }
 ```
 
-Sau khi cấu hình, **thoát và khởi động lại opencode** để skill được nạp.
+After configuring, **quit and restart opencode** for the skill to load.
 
-### Cách 3: copy thủ công (tương thích chéo)
+### Option 3: manual copy (cross-compatible)
 
-Copy thư mục skill vào đúng path của agent:
+Copy the skill directory into the agent's expected path:
 ```bash
-mkdir -p ~/code/cloudflared-tunnel-skill/skills
 cp -r skills/cloudflared-tunnel ~/.config/opencode/skills/          # opencode (global)
 cp -r skills/cloudflared-tunnel ~/.claude/skills/                   # claude-code (global)
 cp -r skills/cloudflared-tunnel .opencode/skills/                   # opencode (project)
 ```
 
-## Nội dung skill
+## Skill contents
 
-SKILL.md hướng dẫn:
-- Cài `cloudflared` (macOS/Linux/Windows)
-- Chạy `cloudflared tunnel --url http://localhost:PORT` và lấy URL `*.trycloudflare.com`
-- Các option hay dùng (`--logfile`, `--no-autoupdate`, `--loglevel`)
-- Lưu ý về tunnel tạm thời, lỗi 502, và bảo mật khi expose
+SKILL.md covers:
+- Installing `cloudflared` (macOS/Linux/Windows)
+- Running `cloudflared tunnel --url http://localhost:PORT` and grabbing the `*.trycloudflare.com` URL
+- Common options (`--logfile`, `--no-autoupdate`, `--loglevel`)
+- Notes on temporary tunnels, 502 errors, and security when exposing a server
 
 ## License
 

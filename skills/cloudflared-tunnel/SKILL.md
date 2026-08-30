@@ -1,11 +1,11 @@
 ---
 name: cloudflared-tunnel
 description: >
-  Tạo quick tunnel bằng `cloudflared tunnel --url` để expose một local web
-  server/port ra internet qua Cloudflare. Use when the user wants to share a
-  locally running web app, VSCode, Jupyter, webhook, or demo over a temporary
-  public URL without a Cloudflare account. Trigger with "tunnel", "public url",
-  "expose port", "trycloudflare", "cloudflared", "share local server".
+  Create a quick tunnel with `cloudflared tunnel --url` to expose a local web
+  server/port to the internet through Cloudflare. Use when the user wants to
+  share a locally running web app, VSCode, Jupyter, webhook, or demo over a
+  temporary public URL without a Cloudflare account. Trigger with "tunnel",
+  "public url", "expose port", "trycloudflare", "cloudflared", "share local server".
 version: 1.0.0
 license: MIT
 author: elahw
@@ -17,74 +17,81 @@ metadata:
   requires-auth: false
 ---
 
-# Quick Tunnel với cloudflared
+# Quick Tunnel with cloudflared
 
-Tạo một URL `*.trycloudflare.com` công khai trỏ tới một local server, không cần
-đăng nhập tài khoản Cloudflare, không cần DNS, không cấu hình trước.
+Create a public `*.trycloudflare.com` URL pointing to a local server — no
+Cloudflare account login, no DNS, no prior configuration needed.
 
-## Khi nào dùng
+## When to use
 
-- User muốn expose một local web server/port (VSCode, Jupyter, app dev, webhook) ra internet tạm thời.
-- User nói "tunnel", "public url", "expose port", "trycloudflare", "cloudflared".
-- URL tạm thời, không yêu cầu tên miền riêng hay lâu dài.
+- The user wants to expose a local web server/port (VSCode, Jupyter, dev app, webhook) to the internet temporarily.
+- The user says "tunnel", "public url", "expose port", "trycloudflare", "cloudflared".
+- A temporary URL is enough; no custom or long-lived domain required.
 
-> Dùng **`cloudflared tunnel --url`** (quick tunnel) thay vì cấu hình named tunnel
-> phức tạp. Khi cần domain ổn định, tên miền riêng, hay qua load balancer thì
-> chuyển sang *named tunnel* (cần `cloudflared tunnel login`).
+> Use **`cloudflared tunnel --url`** (quick tunnel) rather than setting up a
+> named tunnel. Switch to a *named tunnel* (needs `cloudflared tunnel login`)
+> when you need a stable domain, a custom domain, or a load balancer.
 
-## Yêu cầu
+## Prerequisites
 
-- `cloudflared` đã cài. Kiểm tra: `cloudflared --version`.
-- Nếu chưa cài, cài bằng:
+- `cloudflared` installed. Check: `cloudflared --version`.
+- If missing, install it:
   - **macOS (Homebrew):** `brew install cloudflared`
   - **Linux (deb):** `wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb && sudo dpkg -i cloudflared-linux-amd64.deb`
   - **Windows (winget):** `winget install Cloudflare.cloudflared`
 
-## Cách chạy
+## How to run
 
-Trước tiên phải có local server đang chạy ở một port. Ví dụ:
+First make sure a local server is running on a port. For example:
 
 ```bash
 python -m http.server 8080
-# hoặc
+# or
 uvicorn app:app --port 8000
-modal_launch.py jupyter --account xxx   # app đang chạy ở 1 port local
+modal_launch.py jupyter --account xxx   # an app running on a local port
 ```
 
-Sau đó mở tunnel trỏ tới port đó:
+Then open a tunnel pointing to that port:
 
 ```bash
 cloudflared tunnel --url http://localhost:8080
 ```
 
-Output sẽ chứa dòng:
+The output will contain a line like:
 
 ```
 Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
 https://<random-string>.trycloudflare.com
 ```
 
-Dùng URL đó để truy cập / chia sẻ. Rất hay dùng cho VSCode/Jupyter vì các app
-này tự có auth (token/password) — tunnel chỉ là lớp vận chuyển public.
+Use that URL to access / share. Great for VSCode/Jupyter since those apps already
+have their own auth (token/password) — the tunnel is just the public transport layer.
 
-## Các option hay gặp
+## Common options
 
 ```bash
 cloudflared tunnel --url http://localhost:8080            # HTTP
 cloudflared tunnel --url http://localhost:8080 --no-autoupdate
-cloudflared tunnel --url http://localhost:8080 --logfile tunnel.log   # ghi log ra file
-cloudflared tunnel --url http://localhost:8080 --loglevel debug       # log chi tiết
+cloudflared tunnel --url http://localhost:8080 --logfile tunnel.log   # write logs to file
+cloudflared tunnel --url http://localhost:8080 --loglevel debug       # verbose logging
 ```
 
-## Lưu ý / xử lý
+## Notes / troubleshooting
 
-- Tunnel chạy ở **foreground** và dừng khi Ctrl+C. Để chạy nền có thể thêm `&`
-  hoặc dùng `--logfile`, nhưng với hầu hết tác vụ nên để foreground trong terminal riêng.
-- URL `trycloudflare.com` là **tạm thời** — mất khi process dừng. Không dùng cho production.
-- Không cần `cloudflared tunnel login` cho quick tunnel kiểu này; login chỉ cần cho named tunnel.
-- Nếu local server chưa chạy hoặc sai port, tunnel vẫn tạo URL nhưng trả về lỗi 502 khi truy cập — hãy xác nhận server local thực sự đang listen đúng port trước.
-- Khi kết hợp với Jupyter/VSCode trên Modal: sau khi có URL của app (`*.modal.run`),
-  nếu muốn public ổn định hơn hãy dùng chính URL Modal (đã có auth), còn `cloudflared`
-  chỉ nên dùng cho server local thiếu auth sẵn (vd `python -m http.server`).
-- Bảo mật: URL public = ai cũng truy cập được. Chỉ expose server có auth riêng,
-  hoặc giới hạn truy cập khi có thể (Cloudflare Access) — không expose thứ nhạy cảm vô điều kiện.
+- The tunnel runs in the **foreground** and stops on Ctrl+C. To run it in the
+  background you can add `&` or use `--logfile`, but for most tasks keep it in
+  the foreground in a separate terminal.
+- The `trycloudflare.com` URL is **temporary** — it disappears when the process
+  stops. Do not use it for production.
+- No `cloudflared tunnel login` is needed for this kind of quick tunnel; login is
+  only required for named tunnels.
+- If the local server is not running or the port is wrong, the tunnel still
+  creates a URL but returns a 502 error when accessed — confirm the local server
+  is actually listening on the right port first.
+- When combined with Jupyter/VSCode on Modal: once you have the app URL
+  (`*.modal.run`), prefer that URL (it already has auth) if you want a more
+  stable public endpoint; use `cloudflared` only for local servers that lack
+  built-in auth (e.g. `python -m http.server`).
+- Security: a public URL means anyone can access it. Only expose servers with
+  their own auth, or restrict access when possible (Cloudflare Access) — never
+  expose sensitive things unconditionally.
